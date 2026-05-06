@@ -374,4 +374,4 @@ We kindly encourage citation of our work if you find it useful.
 Please contact us at <a href="mailto:longcat-team@meituan.com">longcat-team@meituan.com</a> or open an issue if you have any questions.
 
 #### WeChat Group
-<img src="https://raw.githubusercontent.com/Chizuruscom/LongCat-wechat-assets/main/Wechat.png" width="200px">
+<img src="https://raw.githubusercontent.com/meituan-longcat/LongCat-Flash-Chat/main/wechat-assets/Wechat.png" width="200px">
