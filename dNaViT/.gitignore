@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Run artifacts
+runs/
+outputs/
+wandb/
+*.log
+
+# Checkpoints / weights (never commit)
+pretrained/
+models/
+*.pth
+*.pt
+*.bin
+*.safetensors
+*.partial
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

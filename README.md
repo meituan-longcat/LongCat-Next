@@ -1,10 +1,69 @@
-# LongCat-Next
+<h1 align="center">LongCat-Next &amp; dNaViT: Native Multimodal Modeling with Discrete Visual Primitives</h1>
+
+---
+
+<a id="dnavit"></a>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/meituan-longcat/LongCat-Flash-Chat/main/figures/longcat_logo.svg"
        width="300"
        alt="LongCat Logo"/>
 </div>
+
+<h2 align="center">dNaViT: Discrete Codes are General-Purpose Visual Representations</h2>
+
+<h3 align="center">Meituan LongCat Team</h3>
+
+<hr>
+
+<p align="center">
+  <a href="https://huggingface.co/meituan-longcat/LongCat-Next"><img alt="Hugging Face: LongCat-Next" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-LongCatNext-ffc107?logoColor=white" /></a>
+  <a href="./dNaViT/"><img alt="GitHub: dNaViT" src="https://img.shields.io/badge/GitHub-dNaViT-a4b5d5?logo=github&amp;logoColor=white" /></a>
+  <a href="https://arxiv.org/abs/2611.12426"><img alt="arXiv: 2611.12426" src="https://img.shields.io/badge/arXiv-2611.12426-b31b1b?logo=arxiv&amp;logoColor=white" /></a>
+</p>
+
+<p align="center">
+  <a href="https://lixiaotong97.github.io/dNaViT/"><img alt="Project Page" src="https://img.shields.io/badge/Project-Page-purple?logo=safari&amp;logoColor=white" /></a>
+  <a href="./dNaViT/README.md"><img alt="Code &amp; Documentation" src="https://img.shields.io/badge/Code-Documentation-a4b5d5?logo=github&amp;logoColor=white" /></a>
+  <a href="./dNaViT/README.md#evaluation-results"><img alt="Evaluation Results" src="https://img.shields.io/badge/Evaluation-Results-ffc107" /></a>
+  <a href="./dNaViT/README.md#training"><img alt="Training" src="https://img.shields.io/badge/dNaViT-Training-eabcdd" /></a>
+</p>
+
+### dNaViT Overview
+
+[![dNaViT: a shared discrete visual vocabulary for reconstruction, understanding, generation, and editing.](./dNaViT/assets/figures/figure-1-teaser.png)](./dNaViT/assets/figures/figure-1-teaser.pdf)
+
+We introduce **dNaViT**, a Discrete Native-resolution Vision Transformer
+that represents native-resolution images through a shared discrete vocabulary.
+Building on our preliminary work in LongCat-Next, dNaViT explores whether
+discrete visual codes can serve as general-purpose representations for
+reconstruction, classification, multimodal understanding, generation, and
+editing.
+
+A frozen pretrained vision encoder supplies semantic features, while a
+lightweight Residual Modulator (ResMod) enriches them with
+reconstruction-aware detail. Grouped product quantization scales discrete
+capacity without increasing the spatial sequence length, and progressive
+three-stage training balances semantic and pixel reconstruction objectives.
+An optional code-conditioned Refiner further improves perceptual quality
+without changing the underlying discrete codes.
+
+The tokenizer implementation, training configurations, reconstruction evaluation
+tools, and detailed results are available in the [dNaViT directory](./dNaViT/).
+
+---
+
+<a id="longcat-next"></a>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/meituan-longcat/LongCat-Flash-Chat/main/figures/longcat_logo.svg"
+       width="300"
+       alt="LongCat Logo"/>
+</div>
+
+<h2 align="center">LongCat-Next: Lexicalizing Modalities as Discrete Tokens</h2>
+
+<h3 align="center">Meituan LongCat Team</h3>
 
 <hr>
 
@@ -339,9 +398,13 @@ We have implemented basic adaptations in SGLang to support the deployment of Lon
 
 We provide supervised fine-tuning (SFT) code for LongCat-Next, built on PyTorch FSDP2. It supports understanding (image+text → text), generation (text → image), and unified mixed-sample training. See [`sft/`](./sft) and its [README](./sft/README.md) for setup, data preparation, and example training scripts.
 
+## dNaViT
+
+The [`dNaViT/`](./dNaViT) directory provides the grouped-product-quantization visual tokenizer, three-stage training configurations, and image reconstruction evaluation tools described in *dNaViT: Discrete Codes are General-Purpose Visual Representations*. It is maintained alongside `sft/` with its own dependencies and launch scripts. See the [dNaViT README](./dNaViT/README.md) for the architecture, results, setup, training, and evaluation instructions. Run its commands from the `dNaViT/` directory.
+
 
 ## License Agreement
-This repository, including both the model weights and the source code, is released under the **MIT License**.
+LongCat-Next model weights and source code are released under the **MIT License**, except where otherwise stated. The `dNaViT/` component retains its **Apache-2.0 License**; see [`dNaViT/LICENSE`](./dNaViT/LICENSE).
 
 Any contributions to this repository are licensed under the MIT License, unless otherwise stated. This license does not grant any rights to use Meituan trademarks or patents.
 
@@ -359,6 +422,24 @@ Nothing in this Model Card should be interpreted as altering or restricting the 
 ## Citation
 
 We kindly encourage citation of our work if you find it useful.
+
+### dNaViT
+
+```bibtex
+@misc{li2026dnavitdiscretecodesgeneralpurposevisual,
+      title={dNaViT: Discrete Codes are General-Purpose Visual Representations},
+      author={Xiaotong Li and Zhengrong Yue and Xu Huang and Jialv Zou and
+              Minhao Jing and Wenhao Yan and Haodong Li and Hai Huang and
+              Bo Zhao and Yan Feng and Peng Pei and Xunliang Cai},
+      year={2026},
+      eprint={2611.12426},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2611.12426},
+}
+```
+
+### LongCat-Next
 
 ```
 @misc{meituanlongcatteam2026longcatnextlexicalizingmodalitiesdiscrete,

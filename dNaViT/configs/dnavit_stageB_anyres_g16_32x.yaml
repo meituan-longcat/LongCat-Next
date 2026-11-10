@@ -1,0 +1,170 @@
+# Copyright (c) 2026 LongCat dNaViT Team.
+# SPDX-License-Identifier: Apache-2.0
+
+# dNaViT stage B - any-resolution product quantization (32x, 16 groups, EMA).
+#
+# The encoder is frozen (backbone + ResMod); only the quantizer, in/out
+# projections, feature decoder and pixel decoder train. The pixel decoder is
+# detached, so the codebook is supervised by feature reconstruction + commitment
+# only. GAN off.
+
+experiment:
+  project: dnavit
+  name: dnavit_stageB_anyres_g16_32x
+  results_dir: runs
+  exp: exp1
+  output_dir: ${experiment.name}/${experiment.exp}
+  # Optional warm start from the stage-A run (quantize.* is excluded below):
+  #init_weight_path: pretrained/tokenizer/stageA_anyres/unwrapped_model
+  init_exclude_prefixes: [quantize., post_quant_unmerger.]
+  max_train_examples: 10000000
+  save_every: 10000
+  eval_every: 20000
+  generate_every: 5000
+  log_every: 50
+  log_grad_norm_every: 1000
+  resume: true
+  logging_dir: ${experiment.name}/${experiment.exp}/logs
+
+model:
+  vq_model:
+    type: pq                                  # ProductVQ (channel split)
+    detach_pixel_decoder: true                # pixel grads stop at the quantizer
+    feature_recon_only: false
+    aux_feature_distill: true
+    feature_recon_target: post_resmod
+    freeze_res_mod: true                      # adapter frozen in this stage
+    encoder_type: qwen3vit
+    qwen3vit_path: pretrained/Qwen3-VL-8B-Instruct
+    encoder_lr_mult: 1.0
+    use_checkpoint: false
+    vit_dec_patch_size: 16
+    vit_dec_width: 1152
+    feature_decoder_type: linear
+    clip_align_layer_id: 2
+    pq_num_groups: 16                         # 4096-d latent -> 16 x 256-d groups
+    rvq_depth: 16                             # unused by ProductVQ, required by shape checks
+    code_dim: 4096
+    codebook_size: 16384
+    post_quant_align_depth: 8
+    shared_codebook: false
+    decay: 0.99
+    restart_unused_codes: true
+    restart_threshold_ratio: 0.03
+    restart_max_per_step: null
+    enable_simvq: false
+    codebook_update_mode: ema
+    use_l2_norm: false
+    rotation_trick: true                      # RVQ-only, ignored by ProductVQ
+    quantize_dropout: false
+    quantize_dropout_cutoff_index: 5
+    quantize_dropout_multiple_of: 1
+    force_in_out_proj: true
+    in_proj_type: rmsnorm_mlp
+    out_proj_type: rmsnorm_mlp
+    proj_num_heads: 16
+    attn_proj_mlp_ratio: 2.0
+    proj_mlp_ratio: 1.0
+    pre_pq_l2_norm: false
+    use_res_mod: true
+    res_mod:
+      layer_idx_list: [1, 3, 6, 9]
+      depth: 2
+      num_heads: 16
+      mlp_ratio: 4.0
+    sem_projector_type: linear
+    merger_as_sem_proj: true
+    merger_after_quant: true
+  discriminator:
+    dino_ckpt_path: pretrained/dino_vit_small_patch8_224.pth
+    norm_type: bn
+
+losses:
+  discriminator_start: 1000000
+  discriminator_factor: 1.0
+  discriminator_weight: 0.0
+  perceptual_loss: lpips-convnext_s-1.0-0.1
+  perceptual_weight: 1.1
+  reconstruction_weight_l1: 0.1
+  reconstruction_weight_l2: 1.0
+  clip_loss_weight: 0.0
+  gram_loss_weight: 10.0
+  commitment_weight: 0.25
+  commitment_loss_type: cumsum
+  entropy_loss_weight: 0.0
+  feature_distill_weight: 1.0
+  feature_distill_cos_weight: 1.0
+  resmod_preserve_weight: 0.0
+  resmod_preserve_mse_weight: 0.0
+  pre_quant_sem_weight: 0.0
+  post_quant_sem_weight: 0.0
+  disc_resize_target: 256
+
+# In-training linear-probe monitor on an ImageFolder subset.
+linear_probe:
+  enable: true
+  imagenet_path: example_data/imagenet_train
+  n_class: 100
+  per_train: 50
+  per_test: 20
+  img_size: 256
+  seed: 42
+
+# In-training reconstruction metrics (PSNR / SSIM / LPIPS / rFID).
+recon_eval:
+  enable: true
+  val_path: example_data/imagenet_val
+  num_images: null
+  img_size: 256
+  batch_size: 32
+
+dataset:
+  type: t2i                                   # anyres jsonl reader
+  params:
+    jsonl_paths: [example_data/sample.jsonl]
+    num_workers_per_gpu: 16
+    patch_size: 16
+    spatial_merge_size: 2
+    min_pixels: 9216
+    max_pixels: 3686400
+    max_tokens_per_sample: 2048
+  preprocessing:
+    resize_shorter_edge: 256
+    crop_size: 256
+    random_crop: false
+    random_flip: true
+    normalize_mean: [0.5, 0.5, 0.5]
+    normalize_std: [0.5, 0.5, 0.5]
+
+optimizer:
+  name: adamw
+  params:
+    learning_rate: 0.0001
+    discriminator_learning_rate: ${optimizer.params.learning_rate}
+    beta1: 0.9
+    beta2: 0.95
+    eps: 1.0e-06
+    weight_decay: 0.0
+
+lr_scheduler:
+  scheduler: cosine
+  params:
+    learning_rate: ${optimizer.params.learning_rate}
+    warmup_steps: 10000
+    end_lr: 1.0e-05
+
+training:
+  compile_model: false
+  gradient_accumulation_steps: 1
+  per_gpu_batch_size: 1
+  max_batch_tokens: 16384
+  enc_freeze_warmup_step: -1
+  mixed_precision: bf16
+  enable_tf32: true
+  use_ema: true
+  seed: 42
+  max_train_steps: 1000000
+  num_generated_images: 2
+  max_grad_norm: 1.0
+  enable_wandb: true
+  resmod_unfreeze_step: 0

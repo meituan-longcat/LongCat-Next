@@ -1,0 +1,29 @@
+# Core
+# Tested with torch 2.6.0 / transformers 4.57.0
+torch>=2.6.0
+torchvision
+numpy
+scipy
+pillow
+omegaconf
+accelerate
+transformers>=4.56.0   # needs the qwen3_vl vision modules
+timm
+einops
+safetensors
+termcolor
+iopath
+
+# Attention kernels (the qwen3vit vision tower is built with
+# attn_implementation="flash_attention_2")
+flash-attn>=2.5.0
+
+# In-training monitors / evaluator
+torch-fidelity        # FID / Inception score / LPIPS used by evaluator/
+scikit-image          # PSNR / SSIM in scripts/eval_recon.py
+scikit-learn          # linear-probe monitor
+tqdm
+
+# Optional
+pytorch-fid           # enables --fid in scripts/eval_recon.py
+bitsandbytes          # only for optimizer.name=adamw_8bit
